@@ -11,6 +11,7 @@ import pandas as pd
 import pickle
 import cv2 as cv
 import joblib
+import math
 
 model = joblib.load('model/model.sav')
 def vectorize(image):
@@ -57,16 +58,20 @@ def main():
         st.image(image)
         img_opencv = np.array(image)
         img_opencv = img_opencv[:, :, ::-1].copy()
-        links = get_neighbours_links(db, get_k_neighbours(vectorize(img_opencv), db, 3))
-        st.success("Similar images from the dataset:")
-        col = st.columns(3)
-        for i in range(len(links)):
-            try:
-                with col[i]:
-                    similar_image = Image.open('images/voc/' + links[i])
-                    st.image(similar_image, width=200)
-            except UnidentifiedImageError:
-                pass
+        if  math.isnan(sum(vectorize(img_opencv))):
+            st.success("Bad image")
+            pass 
+        else:
+            links = get_neighbours_links(db, get_k_neighbours(vectorize(img_opencv), db, 3))
+            st.success("Similar images from the dataset:")
+            col = st.columns(3)
+            for i in range(len(links)):
+                try:
+                    with col[i]:
+                        similar_image = Image.open('images/voc/' + links[i])
+                        st.image(similar_image, width=200)
+                except UnidentifiedImageError:
+                    pass
 
 
 if __name__ == '__main__':
